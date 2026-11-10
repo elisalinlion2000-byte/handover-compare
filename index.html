@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>交班文件對照</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: sticky document chips, then one long column per document: sections in order, SERP path card, questions. Single light theme. */
+:root {
+  --bg: #F6F4EF;
+  --panel: #FBFAF7;
+  --line: #E0DCD2;
+  --ink: #16212E;
+  --muted: #5B6470;
+  --accent: #B5441A;
+  --dark: #16212E;
+  --lion: #EF3545;
+  --font: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', Arial, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); line-height: 1.6; }
+body { padding-bottom: 56px; }
+header { padding: 24px 16px 12px; max-width: 1100px; margin: 0 auto; }
+header h1 { margin: 0; font-size: 26px; line-height: 1.3; text-wrap: balance; }
+header p { margin: 4px 0 0; color: var(--muted); font-size: 15px; }
+.chips-wrap { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding: 10px 16px; max-width: 1100px; margin: 0 auto; scrollbar-width: thin; }
+.chip { flex: none; font: inherit; font-size: 15px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+.chip[aria-selected="true"] { background: var(--dark); color: #F6F4EF; border-color: var(--dark); font-weight: 700; }
+button:focus-visible, .zoomable:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 0; display: flex; flex-direction: column; gap: 28px; }
+.title-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; }
+.title-row h2 { margin: 0; font-size: 24px; }
+.timeline { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font-size: 15px; }
+.timeline b { color: var(--accent); }
+.path { background: var(--dark); color: #F6F4EF; border-radius: 12px; padding: 14px 18px; display: flex; flex-direction: column; gap: 4px; }
+.path .lab { font-size: 14px; color: #F2A65A; font-weight: 700; }
+.path .val { font-size: 18px; font-weight: 500; overflow-wrap: anywhere; }
+.path .sub { font-size: 14px; color: #C9D1DB; }
+.paths { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+section.sec { display: flex; flex-direction: column; gap: 12px; }
+section.sec > h3 { margin: 0; font-size: 19px; padding-left: 10px; border-left: 4px solid var(--accent); }
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.grid.wide { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
+@media (max-width: 520px) { .grid, .grid.wide { grid-template-columns: 1fr; } }
+figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+figcaption { font-size: 15px; color: var(--muted); }
+.frame { background: #ECE8DF; border-radius: 12px; padding: 10px; }
+.frame img { display: block; width: 100%; border-radius: 6px; background: #fff; }
+.zoomable { cursor: zoom-in; }
+.ph { border: 2px dashed #B8B2A4; background: var(--bg); border-radius: 12px; padding: 22px; text-align: center; color: var(--muted); font-size: 15px; }
+.hint { color: var(--muted); font-size: 14px; margin: 0; }
+.note { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 12px 16px; font-size: 16px; }
+details.more { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 16px; }
+details.more summary { cursor: pointer; font-weight: 700; font-size: 16px; }
+details.more .grid { margin-top: 14px; }
+.info { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+.card h3 { margin: 0 0 6px; font-size: 15px; color: var(--accent); }
+.card p { margin: 0; font-size: 16px; }
+.card .todo { color: var(--muted); }
+.asks { background: var(--dark); color: #F6F4EF; border-radius: 12px; padding: 18px 20px; }
+.asks h3 { margin: 0 0 8px; font-size: 16px; color: #F2A65A; }
+.asks ol { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 4px; }
+
+
+.tables { display: flex; flex-direction: column; gap: 28px; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+.tablewrap table { border-collapse: collapse; width: 100%; min-width: 820px; font-size: 15px; }
+.tablewrap th, .tablewrap td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.tablewrap thead th { background: var(--dark); color: #F6F4EF; font-size: 14px; white-space: nowrap; }
+.tablewrap tbody th { font-weight: 700; white-space: nowrap; }
+.tablewrap tbody tr:last-child th, .tablewrap tbody tr:last-child td { border-bottom: 0; }
+.tablewrap .todo { color: var(--muted); }
+.tablewrap .sub { color: var(--muted); font-size: 14px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+.vtabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.vtab { font: inherit; font-size: 16px; font-weight: 500; padding: 10px 20px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+.vtab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+
+/* Lightbox */
+.lightbox { position: fixed; inset: 0; z-index: 30; background: rgba(22,33,46,.94); display: none; flex-direction: column; }
+.lightbox.open { display: flex; }
+.lightbox .bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 16px; color: #F6F4EF; font-size: 15px; }
+.close { font: inherit; border: 1px solid #F6F4EF; background: transparent; color: #F6F4EF; border-radius: 8px; padding: 8px 16px; cursor: pointer; }
+.lightbox .scroll { flex: 1; overflow: auto; padding: 0 12px 24px; }
+.lightbox img { display: block; width: 100%; max-width: 1000px; margin: 0 auto; cursor: zoom-in; background: #fff; }
+.lightbox img.big { width: 240%; max-width: none; cursor: zoom-out; }
+
+/* Daily report demo (導領平台日報表) */
+.demo-wrap { display: flex; flex-direction: column; gap: 10px; }
+.demo-banner { font-size: 14px; color: var(--muted); }
+.lp { position: relative; margin: 0 auto; max-width: 560px; width: 100%; background: #F0F0F0; border: 1px solid #D9D9D9; border-radius: 14px; overflow: hidden; color: #333; font-size: 15px; }
+.lp-top { background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; box-shadow: 0 1px 4px rgba(0,0,0,.12); position: relative; z-index: 1; }
+.lp-logo { font-weight: 700; font-size: 17px; color: #4a4a4a; display: flex; align-items: center; gap: 6px; }
+.lp-logo i { width: 22px; height: 22px; background: var(--lion); border-radius: 6px 12px 6px 12px; display: inline-block; }
+.lp-nav { color: #666; font-size: 12px; }
+.lp-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.lp-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08); overflow: hidden; }
+.lp-info { padding: 12px 14px; display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; position: relative; }
+.lp-info dt { color: #888; margin: 0; }
+.lp-info dd { margin: 0; overflow-wrap: anywhere; }
+.lp-status { position: absolute; right: 14px; top: 10px; color: var(--lion); display: flex; align-items: center; gap: 6px; }
+.lp-status::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--lion); display: inline-block; }
+.lp-day { background: #FDE8EA; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.lp select, .lp input[type=text], .lp textarea { font: inherit; width: 100%; padding: 8px 10px; border: 1px solid #BDBDBD; border-radius: 6px; background: #fff; color: #333; }
+.lp textarea { min-height: 84px; resize: vertical; }
+.lp-tabs { display: grid; grid-template-columns: repeat(5, 1fr); background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08); overflow: hidden; }
+.lp-tab { font: inherit; border: 0; background: #fff; color: var(--lion); padding: 12px 4px; cursor: pointer; }
+.lp-tab[aria-selected="true"] { background: var(--lion); color: #fff; }
+.lp-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.lp-head h4 { margin: 0; font-size: 16px; font-weight: 400; color: #555; }
+.lp-actions { display: flex; gap: 8px; }
+.lp-btn { font: inherit; font-size: 14px; border: 1px solid var(--lion); background: var(--lion); color: #fff; padding: 7px 14px; border-radius: 8px; cursor: pointer; }
+.lp-btn.ghost { background: #fff; color: var(--lion); }
+.lp-btn.small { padding: 5px 12px; }
+.lp-item-h { display: flex; align-items: center; gap: 8px; padding: 12px 12px 12px 0; border-bottom: 1px solid #EEE; flex-wrap: wrap; }
+.lp-badge { background: var(--lion); color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 0 4px 4px 0; align-self: center; }
+.lp-bar { width: 4px; height: 22px; background: var(--lion); border-radius: 0 2px 2px 0; }
+.lp-name { flex: 1; min-width: 140px; background: #F0F0F0; border-radius: 8px; padding: 8px 10px; overflow-wrap: anywhere; }
+.lp-chk { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; }
+.lp-ud { display: flex; }
+.lp-ud button { font: inherit; border: 0; background: #EEE; width: 34px; height: 34px; cursor: pointer; color: #444; }
+.lp-ud button:first-child { border-radius: 6px 0 0 6px; }
+.lp-ud button:last-child { border-radius: 0 6px 6px 0; border-left: 1px solid #DDD; }
+.lp-ud button:disabled { color: #BBB; cursor: default; }
+.lp-sec { padding: 12px 14px; border-bottom: 1px solid #EEE; display: flex; flex-direction: column; gap: 10px; }
+.lp-sec h5 { margin: 0; font-size: 14px; font-weight: 400; color: #888; }
+.lp-times { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lp-times label { display: flex; flex-direction: column; gap: 4px; font-size: 15px; }
+.lp-dim { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.lp-dim .t { font-weight: 700; }
+.lp-dim .d { font-size: 12px; color: #777; display: block; font-weight: 400; }
+.lp-stars { display: flex; align-items: center; gap: 4px; flex: none; font-size: 12px; color: #777; }
+.lp-stars button { font: inherit; font-size: 26px; line-height: 1; border: 0; background: transparent; padding: 0 1px; cursor: pointer; color: #D6D6D6; }
+.lp-stars button[aria-checked="true"], .lp-stars button.on { color: #F5A800; }
+.lp-photo { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid #EEE; color: #555; }
+.lp-photo label { cursor: pointer; }
+.lp-foot { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; }
+.lp-trash { font: inherit; width: 36px; height: 36px; border-radius: 50%; border: 0; background: var(--lion); color: #fff; cursor: pointer; }
+.lp-trash:disabled { background: #CFCFCF; cursor: default; }
+.lp-submit { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lp-submit .lp-btn { padding: 12px; font-size: 15px; }
+.lp-toast { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); background: rgba(22,33,46,.92); color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 14px; z-index: 4; }
+.lp-modal { position: absolute; inset: 0; background: rgba(0,0,0,.45); z-index: 3; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.lp-dialog { background: #fff; border-radius: 12px; padding: 18px; width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 14px; }
+.lp-dialog h4 { margin: 0; font-size: 17px; }
+.lp-dialog p { margin: 0; font-size: 14px; color: #666; }
+.lp-dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
+.lp-empty { padding: 14px; color: #777; }
+
+/* 分房表 demo (導領平台 APP) */
+.rl { position: relative; margin: 0 auto; width: 100%; max-width: 390px; background: #f4f4f5; border: 1px solid #D9D9D9; border-radius: 14px; overflow: hidden; color: #1d1d1f; font-size: 14px; }
+.rl button, .rl input, .rl textarea { font-family: inherit; }
+.rl-top { background: #fff; border-bottom: 1px solid #e4e4e7; padding: 8px 8px 0; }
+.rl-bar { display: flex; align-items: center; height: 40px; }
+.rl-bar b { flex: 1; text-align: center; font-size: 17px; }
+.rl-bar span { width: 44px; text-align: center; font-size: 12px; color: #52565c; }
+.rl-date { display: flex; align-items: center; gap: 8px; padding: 6px 4px 12px; }
+.rl-date .d { flex: 1; text-align: center; font-size: 18px; font-weight: 700; }
+.rl-sq { width: 40px; height: 40px; border: 1px solid #d92b36; border-radius: 10px; background: #fff; color: #d92b36; font-size: 20px; cursor: pointer; line-height: 1; }
+.rl-sq.fill { background: #d92b36; color: #fff; }
+.rl-sp { width: 40px; flex: none; }
+.rl-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.rl-hotel { background: #fde7ef; border: 1px solid #f6c6d8; border-radius: 14px; padding: 12px 14px; display: flex; gap: 8px; align-items: flex-start; }
+.rl-hotel .z { font-size: 18px; font-weight: 700; }
+.rl-hotel .e { font-size: 13px; color: #9a4f68; margin-top: 2px; }
+.rl-pill { flex: none; margin-left: auto; font-size: 13px; font-weight: 700; padding: 4px 12px; border: 1px solid #f0aec6; border-radius: 999px; background: #fff; }
+.rl-box { background: #fff; border: 1px solid #d4d5d9; border-radius: 14px; overflow: hidden; }
+.rl-fin { width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 0; background: #fff; cursor: pointer; text-align: left; font-size: 15px; font-weight: 700; }
+.rl-fin small { font-size: 12px; color: #52565c; font-weight: 400; }
+.rl-fin i { margin-left: auto; font-style: normal; color: #52565c; }
+.rl-fintext { padding: 10px 14px 12px; border-top: 1px solid #eee; font-weight: 700; }
+.rl-copy { background: #fff8ec; border: 1px solid #f0d9a8; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.rl-copy span { font-size: 13px; color: #7a5a16; }
+.rl-copy div { display: flex; gap: 10px; }
+.rl-b { flex: 1; height: 44px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: 1px solid #c9ccd1; background: #fff; color: #1d1d1f; }
+.rl-b.dark { background: #1d1d1f; color: #fff; border-color: #1d1d1f; }
+.rl-room { background: #fff; border: 1px solid #d4d5d9; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.rl-rn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #1d1d1f; color: #fff; font-weight: 700; }
+.rl-rn input { flex: 1; min-width: 0; height: 40px; padding: 0 10px; border: 1px solid #8a9098; border-radius: 8px; background: #fff; font-size: 16px; font-weight: 700; }
+.rl-rn em { font-style: normal; font-size: 12px; color: #c9ccd1; font-weight: 400; }
+.rl-rk { display: flex; gap: 10px; padding: 10px 12px; background: #f6f6f7; border-top: 1px solid #efeff1; align-items: flex-start; }
+.rl-rk label { font-size: 13px; font-weight: 700; white-space: nowrap; }
+.rl-rk label small { display: block; font-size: 10px; color: #7a7f86; font-weight: 400; }
+.rl-rk textarea { flex: 1; min-width: 0; padding: 6px 8px; border: 1px solid #8a9098; border-radius: 8px; font-size: 13px; resize: none; }
+.rl-p { padding: 8px 12px; border-top: 1px solid #efeff1; }
+.rl-p b { font-size: 15px; margin-right: 8px; }
+.rl-p span { font-size: 11px; color: #5b6067; }
+.rl-p div { margin-top: 3px; font-size: 12px; color: #3f4348; }
+.rl-need { background: #fff; border: 1px dashed #c9ccd1; border-radius: 14px; padding: 20px 14px; text-align: center; color: #52565c; }
+.rl-need div { display: flex; gap: 10px; justify-content: center; margin: 12px 0 6px; }
+.rl-need .rl-b { flex: none; padding: 0 18px; border-color: #1d1d1f; }
+.rl-cnt { text-align: center; font-size: 13px; color: #3f4348; }
+.rl-ok { color: #0b7a5a; font-weight: 700; }
+.rl-bad { color: #b01e28; }
+.rl-dl { width: 100%; height: 48px; border: 0; border-radius: 12px; background: #d92b36; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; }
+.rl-pv { position: absolute; inset: 0; z-index: 3; background: #fff; display: flex; flex-direction: column; }
+.rl-pvh { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #e4e4e7; font-weight: 700; }
+.rl-pvh button { border: 0; background: transparent; font-size: 22px; cursor: pointer; width: 36px; height: 36px; }
+.rl-pvh span { margin-left: auto; font-size: 12px; color: #52565c; font-weight: 400; }
+.rl-pvb { flex: 1; min-height: 0; overflow: auto; position: relative; }
+.rl-wm { position: absolute; inset: 0; z-index: 2; pointer-events: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='150'><text x='125' y='75' text-anchor='middle' transform='rotate(-24 125 75)' font-family='sans-serif' font-size='13' font-weight='700' fill='rgba(29,29,31,0.12)'>領隊 王小明　2026/11/10</text></svg>"); }
+.rl-pvh2 { position: relative; z-index: 3; padding: 10px 14px; border-bottom: 1px solid #e4e4e7; background: #fff; font-size: 13px; }
+.rl-tbl { position: relative; z-index: 3; background: #fff; overflow-x: auto; }
+.rl-tbl table { border-collapse: collapse; width: max-content; min-width: 100%; font-size: 12px; }
+.rl-tbl th { background: #dbe9f6; text-align: left; padding: 7px 8px; border-right: 1px solid #cdd8e4; white-space: nowrap; }
+.rl-tbl td { padding: 6px 8px; border-top: 1px solid #eef0f2; white-space: nowrap; }
+.rl-pvn { position: relative; z-index: 3; background: #fff; font-size: 11px; color: #8a9098; padding: 6px 14px; }
+.rl-pvf { position: relative; z-index: 3; background: #fff; border-top: 1px dashed #a1a5ab; padding: 12px 14px; font-size: 12px; line-height: 1.8; white-space: pre-line; }
+.rl-pvt { padding: 10px 14px 16px; border-top: 1px solid #e4e4e7; }
+.rl-pvt .rl-cnt { margin-bottom: 8px; }
+.rl-toast { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); background: rgba(22,33,46,.92); color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 14px; z-index: 5; white-space: nowrap; }
+.paperc { white-space: nowrap; } .thumb { padding: 0; border: 1px solid var(--line); background: #fff; border-radius: 4px; cursor: zoom-in; margin-right: 6px; } .thumb img { display: block; width: 64px; height: 90px; object-fit: cover; object-position: top; border-radius: 3px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>交班文件 紙本與線上對照</h1>
+  <p>選擇文件，查看過往紙本、導領平台與 SERP 的畫面。點選圖片可放大。</p>
+</header>
+<div class="chips-wrap"><div class="chips" id="chips" role="tablist" aria-label="交班文件"></div></div>
+<main id="main"></main>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="放大檢視">
+  <div class="bar"><span id="lbCap"></span><button class="close" id="lbClose" type="button">關閉</button></div>
+  <div class="scroll"><img id="lbImg" alt=""></div>
+</div>
+
+<script>
+/* Data. Image paths are relative to this page. path = SERP menu path taken from the sheet "SERP交班項目". */
+function I(f, cap) { return { src: 'img/' + f, cap: cap }; }
+
+var SHOTS = [
+  I('daily-shot-1.png', '飯店：選擇第幾天行程'), I('daily-shot-2.png', '行程：景點評分'), I('daily-shot-3.png', '導遊：評分'),
+  I('daily-shot-4.png', '導遊：導遊名稱與評分'), I('daily-shot-5.png', '餐廳：用餐項目與評分'), I('daily-shot-6.png', '行程：暫存、送出第 1 天'),
+  I('daily-shot-7.png', '餐廳：評分與照片'), I('daily-shot-8.png', '飯店：評分與暫存'), I('daily-shot-9.png', '餐廳：項目清單')
+];
+
+var PAPER = {
+  '收件一覽表': [I('paper-intake.png', '團體收件一覽表（紙本，第 1 頁，共 2 頁）')],
+  '合約書': [I('paper-contract.png', '團體規格書（紙本，第 1 頁，共 2 頁；領隊、導遊欄位已模糊）')],
+  '開票名單': [I('paper-invoice.png', '開票名單（紙本，第 1 頁，共 2 頁）'), I('paper-invoice-mid.png', '開票名單（有中段名單）')],
+  'Q 信箱': [I('paper-qbox.png', 'Q 信箱列印（紙本，第 1 頁，共 5 頁；人名與內容已模糊）')]
+};
+var HANDOVER = [
+  { t: '國外團體', rows: [
+    ['收件一覽表', '聯結 > 收件一覽表', '直連', '直聯資料', ''],
+    ['合約書', 'TP／RC 上傳', 'PDF', 'PDF、Word 上傳', ''],
+    ['開票名單', 'AL 入名單 >（勾選［印中段、］）一般', '直連', '直聯資料', '預設勾選：JION、湊票、班機資料、印中段'],
+    ['PNR', '', 'PDF', 'PDF、Word 上傳', ''],
+    ['保單', '', 'PDF', 'PDF、Word 上傳', ''],
+    ['說明會資料', '說明會 > 公事包 ICON', '直連（詳）', '直聯資料', ''],
+    ['Q 信箱', '團號公司 > Q', '直連', '直聯資料', ''],
+    ['旅客及同行聯絡資料表', '聯結 > 旅客及同行聯絡資料表', '直連', '直聯資料', '預設勾選：JION、湊票；POC 階段為 6 月紙本'],
+    ['團體名單', '聯結 >（勾選［年齡、上下車地、OP 備註…］）> 名單', '直連', '直聯資料', '預設勾選：JION、湊票；POC 階段為 6 月紙本'],
+    ['分房表', '聯結 >（勾選）分房表', '直連（需選擇，需有天數）', '直聯資料；搭配現行設計的分房表畫面，有備註功能', 'POC 階段為 6 月紙本']
+  ] },
+  { t: '國內團體', rows: [
+    ['領隊交班單', '線控團體 > 聯結 > 交班單', '直連', '', ''],
+    ['BUDGET 表（預支表）', '目的地作業管理 > 訂購列表', '直連（需選擇［類別順序／日期順序］）', '', '匯出為 PDF；POC 階段為紙本'],
+    ['行程表（說資）', '線控團體 > 說明會 > 公事包 ICON', '直連', '', ''],
+    ['ITIN 表', '目的地作業管理 > 訂購列表', '直連（需選擇）', '', ''],
+    ['旅客名單', '線控團體 > 聯結 > LOCAL 名單', '直連（需選擇）', '', 'POC 階段為紙本'],
+    ['巴士座位表', '巴士選位 > 開團控車列表 > 點選［人］ICON', '直連', '', '系統為 Word 檔'],
+    ['分房表', '聯結 >（勾選）分房表', '直連（需選擇）', '', 'POC 階段為紙本'],
+    ['保險證（含名冊）', '', 'PDF', '', ''],
+    ['訂房單／預約單', '', 'PDF', '', '傳真或 LINE 截圖檔'],
+    ['車名條', '', '', '', 'POC 階段為紙本']
+  ] }
+];
+
+var DOCS = [
+  { id: 'contract', name: '領隊委任契約書',
+    times: [['6/1', '全面撤除紙本']],
+    paths: [['SERP 路徑', '導領原料管理 > 委任契約書查詢列表', '也可由 線控團體 >〔委〕字 查詢']],
+    added: '',
+    secs: [
+      { tab: 'SERP', t: 'SERP 查詢列表（導領原料管理 > 委任契約書查詢列表）', imgs: [I('contract-serp.png', '委任契約書查詢列表')] },
+      { tab: '線上契約書', t: '線上契約書', imgs: [I('contract-1.png', '契約書首頁'), I('contract-2.png', '契約書後段條款'), I('contract-3.png', '簽署頁')] }
+    ] },
+  { id: 'consent', name: '各式同意書',
+    times: [['6/1', '正式上線'], ['8/6', '後台正式上線'], ['9/2', '全面撤除紙本']],
+    paths: [['SERP 路徑', '導領原料管理 > 各式同意書查詢列表', '']],
+    added: '',
+    secs: [
+      { tab: '紙本', t: '紙本', imgs: [I('consent-paper.png', '臨時的手寫行程變更同意書；紙本傳閱時，個人資料（姓名）被其他旅客看見')] },
+      { tab: '導領平台', t: '導領平台', imgs: [I('consent-online-1.png', '代金領取確認書（線上簽署畫面）'), I('consent-online-2.png', '以 QR Code／連結／平板提供旅客簽署')] },
+      { tab: 'SERP', t: 'SERP', imgs: [I('consent-serp.png', '各式同意書查詢列表')] }
+    ] },
+  { id: 'daily-report', name: '領隊日報表',
+    times: [['7/1', '歐洲線全面撤除紙本'], ['9/1', '全面撤除紙本']],
+    paths: [['PBI', '日報表 PBI', '可截圖，或列印另存 PDF'], ['SERP 路徑', '品質分析 > 導領日報表分析', '']],
+    added: '評分（1 至 4 星）、各項目開始／結束時間、備註、照片上傳、「與說資順序不符合」勾選',
+    secs: [
+      { tab: '紙本', t: '紙本', imgs: [I('daily-paper.jpg', '領隊日報檢查表（紙本）')] },
+      { tab: '導領平台', t: '線上領隊填寫（導領平台互動版）', demo: true, shots: SHOTS },
+      { tab: 'SERP', t: 'SERP 後台', imgs: [I('daily-serp-1.png', '導領日報表分析：查詢條件、總覽、各構面滿意度'), I('daily-serp-2.png', '各構面評分彙整、分數分布、整體滿意度、月趨勢'), I('daily-serp-3.png', '供應商排行、尚未填寫日報表、評分明細清單（導遊姓名已模糊）')] },
+      { tab: 'PBI', t: 'PBI 日報表', imgs: [I('daily-pbi-1.png', '導領日報表 Dashboard：綜合評分'), I('daily-pbi-2.png', '領隊資訊與景點評分明細'), I('daily-pbi-3.png', '飯店、導遊、司機備註與景點照片入口')] }
+    ] },
+  { id: 'room-list', name: '分房表',
+    times: [],
+    paths: [['SERP 路徑', '團產作業 > 線控團體 > 連結 >（勾選）分房表', '國外團體：直連（需選擇，需有天數）；國內團體：直連（需選擇）']],
+    added: '依入住日期切換、房號填寫（已填 X / Y 間提醒）、分房備註（不帶入下載）、複製前天分房／清除分房（連續同飯店）、下載預覽（含浮水印）、最後一天可新增空白分房並選擇版型',
+    secs: [
+      { tab: '紙本', t: '紙本', imgs: [I('paper-roomlist.png', '分房表（紙本，領隊手寫勾選；姓名、生日已模糊）')] },
+      { tab: 'SERP', t: 'SERP 畫面', imgs: [I('roomlist-serp-1.png', '分房表 RoomList（SERP 列印）')] },
+      { tab: '導領平台', t: '導領平台改版分房表（互動版）', rl: true, imgs: [] }
+    ] },
+  { id: 'handover', name: '交班文件', times: [], noAdded: true, table: HANDOVER,
+    paths: [['國內外團體交班文件入口', '團產作業 > 線控團體 > 連結 > 交班單', '試算表「SERP交班項目」標示為期望路徑']],
+    secs: [{ t: 'SERP 畫面：團體名單', imgs: [I('roomlist-serp-2.png', '團體名單（SERP 列印）')] }] }
+];
+
+var chips = document.getElementById('chips');
+var main = document.getElementById('main');
+var cur = DOCS[0];
+var TABSTATE = {};
+
+function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+/* ---------- images and lightbox ---------- */
+function figure(im) {
+  var f = el('figure'); var fr = el('div', 'frame');
+  var img = el('img', 'zoomable'); img.src = im.src; img.alt = im.cap; img.loading = 'lazy'; img.tabIndex = 0;
+  img.addEventListener('click', function () { openLb(im); });
+  img.addEventListener('keydown', function (e) { if (e.key === 'Enter') openLb(im); });
+  fr.appendChild(img); f.appendChild(fr); f.appendChild(el('figcaption', '', im.cap));
+  return f;
+}
+function gallery(imgs, wide) { var g = el('div', 'grid' + (wide ? ' wide' : '')); imgs.forEach(function (im) { g.appendChild(figure(im)); }); return g; }
+
+var lb = document.getElementById('lightbox'), lbImg = document.getElementById('lbImg');
+function openLb(im) { lbImg.src = im.src; lbImg.alt = im.cap; lbImg.className = ''; document.getElementById('lbCap').textContent = im.cap; lb.classList.add('open'); document.getElementById('lbClose').focus(); }
+function closeLb() { lb.classList.remove('open'); }
+lbImg.addEventListener('click', function () { lbImg.classList.toggle('big'); });
+document.getElementById('lbClose').addEventListener('click', closeLb);
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLb(); });
+
+/* ---------- document view ---------- */
+function render() {
+  chips.querySelectorAll('.chip').forEach(function (c) { c.setAttribute('aria-selected', c.dataset.id === cur.id ? 'true' : 'false'); });
+  main.textContent = '';
+
+  var tr = el('div', 'title-row'); tr.appendChild(el('h2', '', cur.name));
+  if (cur.times.length) {
+    var tl = el('div', 'timeline');
+    cur.times.forEach(function (t) { var s = el('span'); s.appendChild(el('b', '', t[0])); s.appendChild(document.createTextNode(' ' + t[1])); tl.appendChild(s); });
+    tr.appendChild(tl);
+  }
+  main.appendChild(tr);
+
+  var shown = cur.secs;
+  if (cur.secs.length > 1) {
+    var ai = TABSTATE[cur.id] || 0; shown = [cur.secs[ai]];
+    var vt = el('div', 'vtabs'); vt.setAttribute('role', 'tablist'); vt.setAttribute('aria-label', '選擇版本');
+    cur.secs.forEach(function (s, i) {
+      var b = el('button', 'vtab', s.tab); b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', i === ai ? 'true' : 'false');
+      b.addEventListener('click', function () { TABSTATE[cur.id] = i; render(); });
+      vt.appendChild(b);
+    });
+    main.appendChild(vt);
+  }
+
+  var ps = el('div', 'paths');
+  cur.paths.forEach(function (p) {
+    var c = el('div', 'path'); c.appendChild(el('span', 'lab', p[0]));
+    c.appendChild(el('span', 'val', p[1] || '路徑待補'));
+    if (p[2]) c.appendChild(el('span', 'sub', p[2]));
+    ps.appendChild(c);
+  });
+  main.appendChild(ps);
+
+  if (cur.table) main.appendChild(buildTable(cur.table));
+
+  shown.forEach(function (s) {
+    var sec = el('section', 'sec'); if (s.t !== s.tab) sec.appendChild(el('h3', '', s.t));
+    if (s.rl) {
+      sec.appendChild(buildRL());
+    } else if (s.demo) {
+      sec.appendChild(buildDemo());
+      var d = el('details', 'more'); d.appendChild(el('summary', '', '現行畫面截圖（' + s.shots.length + ' 張）'));
+      d.appendChild(gallery(s.shots, false)); sec.appendChild(d);
+    } else if (s.text) {
+      sec.appendChild(el('p', 'note', s.text));
+    } else if (s.imgs.length) {
+      sec.appendChild(gallery(s.imgs, s.imgs.length === 1));
+    } else {
+      sec.appendChild(el('div', 'ph', '尚未提供圖片'));
+    }
+    main.appendChild(sec);
+  });
+
+  if (cur.noAdded) return;
+  var info = el('div', 'info');
+  var c = el('div', 'card'); c.appendChild(el('h3', '', '領隊新增記載'));
+  c.appendChild(cur.added ? el('p', '', cur.added) : el('p', 'todo', '待補')); info.appendChild(c);
+  main.appendChild(info);
+
+}
+
+/* ---------- 交班文件 table ---------- */
+function cell(tag, text) {
+  var c = el(tag);
+  if (text) c.textContent = text; else { c.textContent = '待補'; c.className = 'todo'; }
+  return c;
+}
+function buildTable(groups) {
+  var box = el('div', 'tables');
+  groups.forEach(function (g) {
+    var sec = el('section', 'sec'); sec.appendChild(el('h3', '', g.t));
+    var wrap = el('div', 'tablewrap'); var tb = el('table');
+    var cap = el('caption', '', g.t + '交班文件的資料位置，以及在 SERP 與導領平台的呈現'); cap.className = 'sr'; tb.appendChild(cap);
+    var tr = el('tr'); ['文件', '資料位置（SERP 路徑）', 'SERP 呈現', '導領平台呈現', '紙本畫面', '備註'].forEach(function (h) { var th = el('th', '', h); th.scope = 'col'; tr.appendChild(th); });
+    var thead = el('thead'); thead.appendChild(tr); tb.appendChild(thead);
+    var tbody = el('tbody');
+    g.rows.forEach(function (r) {
+      var row = el('tr'); var th = el('th', '', r[0]); th.scope = 'row'; row.appendChild(th);
+      row.appendChild(cell('td', r[1])); row.appendChild(cell('td', r[2])); row.appendChild(cell('td', r[3]));
+      var pt = el('td', 'paperc'); var pl = PAPER[r[0]];
+      if (pl) pl.forEach(function (im) { var b = el('button', 'thumb'); b.type = 'button'; b.title = im.cap; b.setAttribute('aria-label', '放大：' + im.cap); var ti = el('img'); ti.src = im.src; ti.alt = im.cap; ti.loading = 'lazy'; b.appendChild(ti); b.addEventListener('click', function () { openLb(im); }); pt.appendChild(b); });
+      else { pt.textContent = '—'; pt.className = 'sub'; }
+      row.appendChild(pt);
+      var n = el('td', 'sub'); n.textContent = r[4] || ''; row.appendChild(n);
+      tbody.appendChild(row);
+    });
+    tb.appendChild(tbody); wrap.appendChild(tb); sec.appendChild(wrap); box.appendChild(sec);
+  });
+  return box;
+}
+
+DOCS.forEach(function (d) {
+  var b = el('button', 'chip', d.name); b.type = 'button'; b.dataset.id = d.id; b.setAttribute('role', 'tab');
+  b.addEventListener('click', function () { cur = d; try { history.replaceState(null, '', '#' + d.id); } catch (e) {} render(); window.scrollTo(0, 0); });
+  chips.appendChild(b);
+});
+function fromHash() {
+  var h = (location.hash || '').replace('#', '');
+  cur = DOCS.filter(function (d) { return d.id === h; })[0] || DOCS[0]; render();
+}
+window.addEventListener('hashchange', fromHash);
+
+
+/* ---------- 導領平台分房表 demo（依 APP 改版設計） ---------- */
+var RL_NIGHTS = [
+  ['里斯本假日飯店', 'HOLIDAY INN LISBON', '1'], ['里斯本假日飯店', 'HOLIDAY INN LISBON', '1'],
+  ['HF 伊帕內瑪花園飯店', 'HF IPANEMA PARK', '2'], ['HF 伊帕內瑪花園飯店', 'HF IPANEMA PARK', '2'],
+  ['梅利亞布蘭科堡飯店', 'MELIA CASTELO BRANCO', '1'], ['埃武拉希爾頓花園飯店', 'HILTON GARDEN INN EVORA', '2'],
+  ['卡帕里卡海岸飯店', 'TRYP LISBOA CAPARICA MAR HOTEL', '1']
+];
+function RP(zh, en, note) { return { zh: zh, en: en, note: note || '' }; }
+var RL_TPL = {
+  '1': [['TRP', [RP('藍先生', 'MR LAN // XIANSHENG'), RP('李小姐', 'MS LI // XIAOJIE', '忌海鮮'), RP('藍小孩', 'MASTER LAN // XIAOHAI')]],
+        ['TWN', [RP('李先生', 'MR LI // XIANSHENG'), RP('周小姐', 'MS CHOU // XIAOJIE')]],
+        ['DBL', [RP('邵小姐', 'MS SHAO // XIAOJIE', 'DBL 忌紅蘿蔔'), RP('陳先生', 'MR CHEN // XIANSHENG')]]],
+  '2': [['TWN', [RP('藍小孩', 'MASTER LAN // XIAOHAI'), RP('李小姐', 'MS LI // XIAOJIE', '忌海鮮')]],
+        ['SGL', [RP('藍先生', 'MR LAN // XIANSHENG')]],
+        ['DBL', [RP('邵小姐', 'MS SHAO // XIAOJIE', 'DBL 忌紅蘿蔔'), RP('陳先生', 'MR CHEN // XIANSHENG')]],
+        ['TWN', [RP('李先生', 'MR LI // XIANSHENG'), RP('周小姐', 'MS CHOU // XIAOJIE')]]]
+};
+var RL_FINAL = { '1': 'TRP*1 + TWN*1 + DBL*1', '2': 'TWN*2 + SGL*1 + DBL*1' };
+var R = { day: 0, extra: 0, tpl: {}, nums: {}, remarks: {}, finalOpen: false, preview: false };
+var rlRoot = null, rlToastTimer = null;
+var WD = ['日', '一', '二', '三', '四', '五', '六'];
+
+function buildRL() {
+  var wrap = el('div', 'demo-wrap');
+  wrap.appendChild(el('p', 'demo-banner', '互動示意：可切換日期、填房號與備註、複製前天分房、預覽下載。輸入的內容不會儲存。'));
+  rlRoot = el('div', 'rl'); wrap.appendChild(rlRoot); drawRL(); return wrap;
+}
+function rlToast(msg) {
+  var t = el('div', 'rl-toast', msg); rlRoot.appendChild(t);
+  clearTimeout(rlToastTimer); rlToastTimer = setTimeout(function () { t.remove(); }, 2000);
+}
+function rlBtn(cls, text, fn) { var b = el('button', cls, text); b.type = 'button'; b.addEventListener('click', fn); return b; }
+function drawRL() {
+  var keep = window.scrollY;
+  rlRoot.textContent = '';
+  var total = RL_NIGHTS.length + R.extra, day = Math.min(R.day, total - 1);
+  var blank = day >= RL_NIGHTS.length, cur = blank ? null : RL_NIGHTS[day], prev = day > 0 && day - 1 < RL_NIGHTS.length ? RL_NIGHTS[day - 1] : null;
+  var dt = new Date(2026, 10, 3 + day);
+  var label = '2026/' + String(dt.getMonth() + 1).padStart(2, '0') + '/' + String(dt.getDate()).padStart(2, '0') + '(' + WD[dt.getDay()] + ')';
+  var tpl = blank ? R.tpl[day] : cur[2];
+  var isLast = day === total - 1;
+  function go(n) { R.day = n; R.preview = false; drawRL(); window.scrollTo(0, keep); }
+
+  var top = el('div', 'rl-top'), bar = el('div', 'rl-bar');
+  bar.appendChild(el('span', '', '‹')); bar.appendChild(el('b', '', '分房表')); bar.appendChild(el('span', '', (day + 1) + '/' + total));
+  top.appendChild(bar);
+  var dr = el('div', 'rl-date');
+  if (day > 0) { var pb = rlBtn('rl-sq', '‹', function () { go(day - 1); }); pb.setAttribute('aria-label', '前一天'); dr.appendChild(pb); } else dr.appendChild(el('span', 'rl-sp'));
+  dr.appendChild(el('div', 'd', label));
+  if (!isLast) { var nb = rlBtn('rl-sq', '›', function () { go(day + 1); }); nb.setAttribute('aria-label', '下一天'); dr.appendChild(nb); }
+  else { var ab = rlBtn('rl-sq fill', '+', function () { R.extra++; go(total); }); ab.setAttribute('aria-label', '新增空白分房'); ab.title = '新增空白分房'; dr.appendChild(ab); }
+  top.appendChild(dr); rlRoot.appendChild(top);
+
+  var body = el('div', 'rl-body'); rlRoot.appendChild(body);
+  var h = el('div', 'rl-hotel'), hi = el('div');
+  if (blank) { hi.appendChild(el('div', 'z', '空白分房（尚未指定飯店）')); hi.appendChild(el('div', 'e', '此日由領隊自行建立房間與房號')); }
+  else { hi.appendChild(el('div', 'z', cur[0])); hi.appendChild(el('div', 'e', cur[1])); }
+  h.appendChild(hi); if (tpl) h.appendChild(el('span', 'rl-pill', '版型' + tpl)); body.appendChild(h);
+
+  var fb = el('div', 'rl-box');
+  var fbtn = rlBtn('rl-fin', '', function () { R.finalOpen = !R.finalOpen; drawRL(); window.scrollTo(0, keep); });
+  fbtn.appendChild(el('span', '', '分房 Final')); fbtn.appendChild(el('small', '', '點擊展開')); fbtn.appendChild(el('i', '', R.finalOpen ? '︿' : '﹀'));
+  fbtn.setAttribute('aria-expanded', R.finalOpen ? 'true' : 'false'); fb.appendChild(fbtn);
+  if (R.finalOpen) fb.appendChild(el('div', 'rl-fintext', tpl ? RL_FINAL[tpl] : '尚未建立'));
+  body.appendChild(fb);
+
+  if (!tpl) {
+    var nd = el('div', 'rl-need'); nd.appendChild(el('p', '', '尚未建立房間，請選擇分房版型'));
+    var row = el('div'); ['1', '2'].forEach(function (t) { row.appendChild(rlBtn('rl-b', '＋ 版型' + t, function () { R.tpl[day] = t; drawRL(); window.scrollTo(0, keep); })); });
+    nd.appendChild(row); nd.appendChild(el('small', '', '點選後會帶入該版型的房間與名單')); body.appendChild(nd); return;
+  }
+  var rooms = RL_TPL[tpl];
+  if (prev && cur && prev[1] === cur[1]) {
+    var cp = el('div', 'rl-copy'); cp.appendChild(el('span', '', '與前一天為同一間飯店，可直接沿用前一天的分房'));
+    var cr = el('div');
+    cr.appendChild(rlBtn('rl-b dark', '複製前天分房', function () { rooms.forEach(function (r, i) { R.nums[day + ':' + i] = R.nums[(day - 1) + ':' + i] || ''; }); drawRL(); window.scrollTo(0, keep); rlToast('已複製前一天的房號'); }));
+    cr.appendChild(rlBtn('rl-b', '清除分房', function () { rooms.forEach(function (r, i) { delete R.nums[day + ':' + i]; }); drawRL(); window.scrollTo(0, keep); }));
+    cp.appendChild(cr); body.appendChild(cp);
+  }
+  rooms.forEach(function (r, i) {
+    var key = day + ':' + i, rm = el('div', 'rl-room');
+    var rn = el('div', 'rl-rn'); rn.appendChild(el('span', '', '房號'));
+    var inp = el('input'); inp.type = 'text'; inp.placeholder = '輸入飯店房號'; inp.value = R.nums[key] || '';
+    inp.setAttribute('aria-label', '房號 ' + (i + 1));
+    inp.addEventListener('input', function () { R.nums[key] = inp.value; updCnt(); });
+    rn.appendChild(inp); rn.appendChild(el('em', '', r[0])); rm.appendChild(rn);
+    var rk = el('div', 'rl-rk'), lb = el('label', '', '分房備註'); lb.appendChild(el('small', '', '不帶入下載'));
+    var ta = el('textarea'); ta.rows = 2; ta.value = R.remarks[key] || ''; ta.addEventListener('input', function () { R.remarks[key] = ta.value; });
+    rk.appendChild(lb); rk.appendChild(ta); rm.appendChild(rk);
+    r[1].forEach(function (p) {
+      var pe = el('div', 'rl-p'); pe.appendChild(el('b', '', p.zh)); pe.appendChild(el('span', '', p.en));
+      if (p.note) pe.appendChild(el('div', '', '備註：' + p.note)); rm.appendChild(pe);
+    });
+    body.appendChild(rm);
+  });
+  var cnt = el('div', 'rl-cnt'); body.appendChild(cnt);
+  function updCnt() {
+    var un = []; rooms.forEach(function (r, i) { if (!(R.nums[day + ':' + i] || '').trim()) un.push('房' + (i + 1)); });
+    cnt.textContent = '房號已填 ' + (rooms.length - un.length) + ' / ' + rooms.length + ' 間';
+    if (!un.length) cnt.appendChild(el('span', 'rl-ok', '　已全部填寫')); else cnt.appendChild(el('span', 'rl-bad', '　未填：' + un.join('、')));
+  }
+  updCnt();
+  body.appendChild(rlBtn('rl-dl', '⤓ 下載分房表', function () { R.preview = true; drawRL(); }));
+
+  if (R.preview) {
+    var un2 = rooms.filter(function (r, i) { return !(R.nums[day + ':' + i] || '').trim(); }).length;
+    var pv = el('div', 'rl-pv'), ph = el('div', 'rl-pvh');
+    var cl = rlBtn('', '×', function () { R.preview = false; drawRL(); }); cl.setAttribute('aria-label', '關閉'); ph.appendChild(cl);
+    ph.appendChild(el('b', '', '下載預覽')); ph.appendChild(el('span', '', '送交飯店的格式')); pv.appendChild(ph);
+    var pb2 = el('div', 'rl-pvb'); pb2.appendChild(el('div', 'rl-wm'));
+    var hd = el('div', 'rl-pvh2'); hd.innerHTML = '<b style="color:#c8202a">LION TRAVEL 雄獅旅遊</b>　TOUR：26CZN03CAB T　<b>分房表 RoomList</b><br>TL 領隊：<b>王小明</b>　｜　' + label; pb2.appendChild(hd);
+    var tw = el('div', 'rl-tbl'), tb = el('table'), thr = el('tr');
+    ['NO', '房號', '中文姓名', '英文姓名', '房型', '備註'].forEach(function (x) { thr.appendChild(el('th', '', x)); });
+    var thd = el('thead'); thd.appendChild(thr); tb.appendChild(thd); var tbd = el('tbody'), n = 0;
+    rooms.forEach(function (r, i) { r[1].forEach(function (p) { var tr = el('tr'); [++n, R.nums[day + ':' + i] || '（未填）', p.zh, p.en, r[0], p.note].forEach(function (v) { tr.appendChild(el('td', '', String(v))); }); tbd.appendChild(tr); }); });
+    tb.appendChild(tbd); tw.appendChild(tb); pb2.appendChild(tw);
+    pb2.appendChild(el('div', 'rl-pvn', '實際下載另含護照、生日等欄位（此為示意，且不含分房備註）'));
+    pb2.appendChild(el('div', 'rl-pvf', 'Final：' + RL_FINAL[tpl])); pv.appendChild(pb2);
+    var pt = el('div', 'rl-pvt'), pc = el('div', 'rl-cnt');
+    pc.textContent = '房號已填 ' + (rooms.length - un2) + ' / ' + rooms.length + ' 間';
+    if (un2) { pc.appendChild(el('span', 'rl-bad', '　尚有 ' + un2 + ' 間未填')); } else pc.appendChild(el('span', 'rl-ok', '　已全部填寫'));
+    pt.appendChild(pc); pt.appendChild(rlBtn('rl-dl', '確認下載', function () { R.preview = false; drawRL(); rlToast('已下載（示意）'); })); pv.appendChild(pt);
+    rlRoot.appendChild(pv);
+  }
+}
+
+/* ---------- 導領平台日報表 demo ---------- */
+var TOUR = { code: '26JKN107CM T', name: '楓紅釜慶雙纜車韓服好好逛5日', start: '2026/11/10', end: '2026/11/14', days: 5 };
+var TABS = [['hotel', '飯店'], ['meal', '餐廳'], ['transport', '交通'], ['trip', '行程'], ['guide', '導遊']];
+var DIMS = {
+  hotel: [['服務配合度', '櫃台及房務服務態度，包括房間分配及入住安排'], ['房間整潔與設施狀況', '客房乾淨度、設施完好程度、衛浴水壓與溫度等'], ['安全與緊急應變設施', '逃生標示、火警設備、安全管理（門禁、監控）'], ['公共設施', 'WIFI提供、無障礙設施及其他設施(健身房、游泳池)等']],
+  meal: [['餐點品質與份量', '菜色口味、溫度、份量是否足夠、團員滿意度'], ['上菜速度與順序', '是否在合理時間內上完菜、冷熱餐上菜邏輯'], ['用餐環境與清潔', '桌面、地板、餐具、洗手間是否乾淨，冷氣與通風是否良好'], ['餐廳配合度與服務態度', '是否配合團體需求（素食、調整時段、事先提供桌次桌型安排）、員工態度'], ['動線與集合安排', '團體進出動線順暢、集合點明確，無障礙設施／電梯']],
+  transport: [['行車安全與駕駛技術', ''], ['車輛設備與功能狀況', ''], ['車輛整潔與舒適度', ''], ['駕駛員態度與配合度', ''], ['是否願意再次合作此車輛／駕駛', '']],
+  trip: [['導覽與解說品質', '解說內容是否豐富清楚，語音導覽設備是否正常'], ['景點設施與動線安排', '洗手間、座椅、動線是否友善團體'], ['安全與應變措施', '是否有清楚標示牌、設施安全、突發狀況應對能力'], ['團員反應與滿意度', '團員是否覺得值得、覺得有趣、有收穫或放鬆感']],
+  guide: [['團務配合度', '對行程流程、團員狀況、與領隊的配合度'], ['解說專業與說話技巧', '導覽內容、景點解說是否進確、有趣、引導有層次'], ['應對團員能力與親和力', '可回應旅客提問、互動及處理臨時狀況的能力'], ['時間控管與節奏掌握', '是否能掌控景點停留時間、不拖延'], ['團隊氣氛營造能力', '是否能帶動氣氛、說笑適當、處事圓融']]
+};
+var NAMES = {
+  hotel: ['QUEENVELL HOTEL'],
+  meal: ['豆芽湯飯醒酒湯', '大樹屋~人蔘雞風味餐（餐標：韓幣1…', '大邱燉排骨（餐標：韓幣14,000/人）'],
+  trip: ['古城76府THE ANCIENT CITY BANGKOK ...'],
+  transport: [], guide: []
+};
+var TIMED = { meal: true, trip: true };
+
+var S = null;
+function newItem(tab, name) { return { name: name, fixed: true, mismatch: false, s: '', e: '', note: '', photos: 0, open: false, r: DIMS[tab].map(function () { return 0; }) }; }
+function newDay() {
+  var d = { tab: 'hotel', items: {}, up: '', dep: '', person: '' };
+  TABS.forEach(function (t) { d.items[t[0]] = NAMES[t[0]].map(function (n) { return newItem(t[0], n); }); });
+  d.items.transport = [newItem('transport', '')]; d.items.transport[0].fixed = false; d.items.transport[0].open = true;
+  d.items.guide = [newItem('guide', '')]; d.items.guide[0].fixed = false; d.items.guide[0].open = true;
+  Object.keys(d.items).forEach(function (k) { if (d.items[k].length === 1) d.items[k][0].open = true; });
+  return d;
+}
+function initDemo() { S = { day: 0, days: [] }; for (var i = 0; i < TOUR.days; i++) S.days.push(newDay()); }
+
+var demoRoot = null, toastTimer = null, modal = null;
+
+function buildDemo() {
+  if (!S) initDemo();
+  var wrap = el('div', 'demo-wrap');
+  wrap.appendChild(el('p', 'demo-banner', '互動示意：可切換日期與分頁、評分、展開項目、調整順序。輸入的內容不會儲存。'));
+  demoRoot = el('div', 'lp'); wrap.appendChild(demoRoot);
+  drawDemo(); return wrap;
+}
+function toast(msg) {
+  var old = demoRoot.querySelector('.lp-toast'); if (old) old.remove();
+  var t = el('div', 'lp-toast', msg); t.setAttribute('role', 'status'); demoRoot.appendChild(t);
+  clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.remove(); }, 2200);
+}
+function dayLabel(i) {
+  var d = new Date(2026, 10, 10 + i);
+  return '第' + (i + 1) + '天 (' + d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0') + ')';
+}
+function btn(cls, text, fn) { var b = el('button', cls, text); b.type = 'button'; b.addEventListener('click', fn); return b; }
+
+function drawDemo() {
+  var keepScroll = window.scrollY;
+  demoRoot.textContent = '';
+  var day = S.days[S.day], tab = day.tab, items = day.items[tab];
+
+  var top = el('div', 'lp-top'); var logo = el('div', 'lp-logo'); logo.appendChild(el('i')); logo.appendChild(document.createTextNode('雄獅旅遊'));
+  top.appendChild(logo); top.appendChild(el('span', 'lp-nav', '首頁　我帶的團　我的假單')); demoRoot.appendChild(top);
+
+  var body = el('div', 'lp-body'); demoRoot.appendChild(body);
+
+  var head = el('div', 'lp-card');
+  var dl = el('dl', 'lp-info');
+  [['團號公司', TOUR.code], ['標準團名', TOUR.name], ['訂單狀況', TOUR.start + ' ~ ' + TOUR.end + ' ' + TOUR.days + ' 天']].forEach(function (r) { dl.appendChild(el('dt', '', r[0])); dl.appendChild(el('dd', '', r[1])); });
+  dl.appendChild(el('span', 'lp-status', '編輯中'));
+  head.appendChild(dl);
+  var dd = el('div', 'lp-day'); var lab = el('label', '', '第幾天行程'); lab.setAttribute('for', 'lp-day');
+  var sel = document.createElement('select'); sel.id = 'lp-day';
+  for (var i = 0; i < TOUR.days; i++) { var o = el('option', '', dayLabel(i)); o.value = i; if (i === S.day) o.selected = true; sel.appendChild(o); }
+  sel.addEventListener('change', function () { S.day = +sel.value; drawDemo(); });
+  dd.appendChild(lab); dd.appendChild(sel); head.appendChild(dd); body.appendChild(head);
+
+  var tabs = el('div', 'lp-tabs'); tabs.setAttribute('role', 'tablist');
+  TABS.forEach(function (t) {
+    var b = btn('lp-tab', t[1], function () { day.tab = t[0]; drawDemo(); });
+    b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', t[0] === tab ? 'true' : 'false'); tabs.appendChild(b);
+  });
+  body.appendChild(tabs);
+
+  if (tab === 'trip') {
+    var dc = el('div', 'lp-card');
+    var sec = el('div', 'lp-sec'); sec.appendChild(el('h4', '', '第' + (S.day + 1) + '天')); sec.lastChild.style.cssText = 'margin:0;font-weight:400;font-size:16px';
+    var tm = el('div', 'lp-times');
+    [['起床時間', 'up'], ['出發時間', 'dep']].forEach(function (f) {
+      var l = el('label', '', f[0]); var inp = document.createElement('input'); inp.type = 'text'; inp.placeholder = f[0] + '，例：09:10'; inp.value = day[f[1]];
+      inp.addEventListener('input', function () { day[f[1]] = inp.value; }); l.appendChild(inp); tm.appendChild(l);
+    });
+    sec.appendChild(tm); dc.appendChild(sec); body.appendChild(dc);
+  }
+
+  var title = { hotel: '飯店評分', meal: '餐廳評分', transport: '交通評分', trip: '行程紀錄', guide: '導遊評分' }[tab];
+  var h = el('div', 'lp-head'); h.appendChild(el('h4', '', title));
+  var acts = el('div', 'lp-actions');
+  if (tab === 'guide') {
+    acts.appendChild(btn('lp-btn', '同前日評分', function () {
+      if (S.day === 0) { toast('第 1 天沒有前一日的評分'); return; }
+      var prev = S.days[S.day - 1].items.guide[0], c = day.items.guide[0];
+      c.r = prev.r.slice(); c.person = prev.person; drawDemo(); toast('已帶入前一日的評分');
+    }));
+    acts.appendChild(btn('lp-btn', '新增', function () { var n = newItem('guide', ''); n.fixed = false; n.open = true; day.items.guide.push(n); drawDemo(); }));
+  } else {
+    acts.appendChild(btn('lp-btn', '批次設定', openBatch));
+  }
+  h.appendChild(acts); body.appendChild(h);
+
+  if (!items.length) body.appendChild(el('div', 'lp-card lp-empty', '尚無項目'));
+  items.forEach(function (it, idx) { body.appendChild(drawItem(tab, items, it, idx)); });
+
+  if (tab === 'transport') body.appendChild(el('p', 'demo-banner', '交通分頁依 PBI 的評分項目示意，說明文字待補。'));
+
+  var sub = el('div', 'lp-submit');
+  sub.appendChild(btn('lp-btn ghost', '暫存' + TABS.filter(function (t) { return t[0] === tab; })[0][1], function () { toast('已暫存（示意）'); }));
+  sub.appendChild(btn('lp-btn', '送出第' + (S.day + 1) + '天', function () { toast('已送出第 ' + (S.day + 1) + ' 天（示意）'); }));
+  body.appendChild(sub);
+  window.scrollTo(0, keepScroll);
+}
+
+function drawItem(tab, items, it, idx) {
+  var card = el('div', 'lp-card');
+  var hd = el('div', 'lp-item-h');
+  if (tab === 'meal' || tab === 'trip') hd.appendChild(el('span', 'lp-badge', String(idx + 1)));
+  else hd.appendChild(el('span', 'lp-bar'));
+
+  if (tab === 'transport' || tab === 'guide') {
+    var inp = document.createElement('input'); inp.type = 'text'; inp.className = 'lp-name'; inp.style.background = '#fff';
+    inp.placeholder = tab === 'guide' ? '導遊名稱，請輸入' : '司機名稱，請輸入'; inp.value = it.person || '';
+    inp.setAttribute('aria-label', tab === 'guide' ? '導遊名稱' : '司機名稱');
+    inp.addEventListener('input', function () { it.person = inp.value; }); hd.appendChild(inp);
+  } else {
+    hd.appendChild(el('span', 'lp-name', it.name));
+  }
+  if (tab === 'hotel' || tab === 'meal' || tab === 'trip') {
+    var cl = el('label', 'lp-chk'); var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = it.mismatch;
+    cb.addEventListener('change', function () { it.mismatch = cb.checked; }); cl.appendChild(cb); cl.appendChild(document.createTextNode('與說資順序不符合')); hd.appendChild(cl);
+    var ud = el('div', 'lp-ud');
+    var up = btn('', '▲', function () { move(items, idx, -1); }); up.disabled = idx === 0; up.setAttribute('aria-label', '上移');
+    var dn = btn('', '▼', function () { move(items, idx, 1); }); dn.disabled = idx === items.length - 1; dn.setAttribute('aria-label', '下移');
+    ud.appendChild(up); ud.appendChild(dn); hd.appendChild(ud);
+  }
+  card.appendChild(hd);
+
+  if (it.open) {
+    if (TIMED[tab]) {
+      var ts = el('div', 'lp-sec'); var tm = el('div', 'lp-times');
+      [['開始時間', 's'], ['結束時間', 'e']].forEach(function (f) {
+        var l = el('label', '', f[0]); var x = document.createElement('input'); x.type = 'text'; x.placeholder = f[0] + '，例：09:10'; x.value = it[f[1]];
+        x.addEventListener('input', function () { it[f[1]] = x.value; }); l.appendChild(x); tm.appendChild(l);
+      });
+      ts.appendChild(tm); card.appendChild(ts);
+    }
+    var rs = el('div', 'lp-sec'); rs.appendChild(el('h5', '', '評分'));
+    DIMS[tab].forEach(function (d, di) {
+      var row = el('div', 'lp-dim'); var l = el('div'); l.appendChild(el('span', 't', d[0])); if (d[1]) l.appendChild(el('span', 'd', d[1])); row.appendChild(l);
+      var st = el('div', 'lp-stars'); st.setAttribute('role', 'radiogroup'); st.setAttribute('aria-label', d[0]);
+      st.appendChild(document.createTextNode('最低'));
+      for (var n = 1; n <= 4; n++) (function (n) {
+        var b = btn(it.r[di] >= n ? 'on' : '', '★', function () { it.r[di] = it.r[di] === n ? 0 : n; drawDemo(); });
+        b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', it.r[di] === n ? 'true' : 'false'); b.setAttribute('aria-label', n + ' 星'); st.appendChild(b);
+      })(n);
+      st.appendChild(document.createTextNode('最高')); row.appendChild(st); rs.appendChild(row);
+    });
+    var nl = el('label', '', '備註／其他評論'); nl.style.fontWeight = '700'; nl.setAttribute('for', 'note-' + tab + idx);
+    var ta = document.createElement('textarea'); ta.id = 'note-' + tab + idx; ta.placeholder = '請輸入'; ta.value = it.note; ta.style.fontWeight = '400';
+    ta.addEventListener('input', function () { it.note = ta.value; });
+    rs.appendChild(nl); rs.appendChild(ta); card.appendChild(rs);
+
+    var ph = el('div', 'lp-photo'); ph.appendChild(el('span', '', '上傳照片'));
+    var right = el('span'); right.style.cssText = 'display:flex;align-items:center;gap:12px';
+    right.appendChild(el('span', '', it.photos + '張'));
+    var fl = el('label', 'lp-btn ghost small', '上傳'); var fi = document.createElement('input'); fi.type = 'file'; fi.accept = 'image/*'; fi.multiple = true; fi.style.display = 'none';
+    fi.addEventListener('change', function () { it.photos += fi.files.length; drawDemo(); });
+    fl.appendChild(fi); right.appendChild(fl); ph.appendChild(right); card.appendChild(ph);
+  }
+
+  var ft = el('div', 'lp-foot');
+  var tg = btn('lp-btn', (it.open ? '︿ ' : '﹀ ') + '評分及照片', function () { it.open = !it.open; drawDemo(); }); tg.setAttribute('aria-expanded', it.open ? 'true' : 'false'); ft.appendChild(tg);
+  var tr = btn('lp-trash', '🗑', function () { items.splice(idx, 1); drawDemo(); }); tr.setAttribute('aria-label', '刪除'); tr.disabled = it.fixed; ft.appendChild(tr);
+  card.appendChild(ft);
+  return card;
+}
+function move(items, i, d) { var j = i + d; if (j < 0 || j >= items.length) return; var t = items[i]; items[i] = items[j]; items[j] = t; drawDemo(); }
+
+function openBatch() {
+  var tab = S.days[S.day].tab, val = 4;
+  modal = el('div', 'lp-modal'); var dg = el('div', 'lp-dialog'); dg.setAttribute('role', 'dialog'); dg.setAttribute('aria-label', '批次設定');
+  dg.appendChild(el('h4', '', '批次設定'));
+  dg.appendChild(el('p', '', '將此分頁所有項目的評分，一次設為同一個分數。'));
+  var st = el('div', 'lp-stars'); st.style.justifyContent = 'center';
+  var btns = [];
+  function paint() { btns.forEach(function (b, i) { b.className = i < val ? 'on' : ''; b.setAttribute('aria-checked', i === val - 1 ? 'true' : 'false'); }); }
+  for (var n = 1; n <= 4; n++) (function (n) { var b = btn('', '★', function () { val = n; paint(); }); b.setAttribute('role', 'radio'); b.setAttribute('aria-label', n + ' 星'); btns.push(b); st.appendChild(b); })(n);
+  paint(); dg.appendChild(st);
+  var row = el('div', 'row');
+  row.appendChild(btn('lp-btn ghost', '取消', function () { modal.remove(); }));
+  row.appendChild(btn('lp-btn', '套用', function () {
+    S.days[S.day].items[tab].forEach(function (it) { it.r = it.r.map(function () { return val; }); });
+    modal.remove(); drawDemo(); toast('已套用 ' + val + ' 星');
+  }));
+  dg.appendChild(row); modal.appendChild(dg); demoRoot.appendChild(modal);
+}
+
+fromHash();
+</script>
+</body>
+</html>
